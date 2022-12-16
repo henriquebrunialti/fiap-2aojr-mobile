@@ -1,4 +1,5 @@
-import 'package:custo_de_vida/API/GetCountry.dart';
+import 'package:custo_de_vida/API/CitiesHttpRequest.dart';
+import 'package:custo_de_vida/API/CountriesHttpRequest.dart';
 import 'package:custo_de_vida/components/CountryAutocomplete.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +23,7 @@ class _SearchState extends State<Search> {
   }
   TextEditingController countryController = TextEditingController();
   // GlobalKey<AutoCompleteTextFieldState<Country>> countryKey = GlobalKey();
-  List<String> suggestions = [];
+  List<String> suggestions = ["brazil"];
 
   List<String> cities = [];
 
@@ -75,24 +76,16 @@ class _SearchState extends State<Search> {
         )));
   }
 
-  void onCountrySelected(String countryName) {
+  void onCountrySelected(String countryName) async {
+    print('selected $countryName');
     _countryAutocomplete.autocompleteSelection = countryName;
     _countryAutocomplete.onCountrySelected = onCountrySelected;
-    if (countryName == "USA") {
-      _citiesAutocomplete.setCities(
-          ["Portland", "New York City", "Los Angeles", "San Francisco"]);
-    } else if (countryName.toLowerCase() == "brasil") {
-      _citiesAutocomplete.setCities([
-        "São Paulo",
-        "Rio de janeiro",
-        "Porto Alegre",
-        "Curitiba",
-        "Salvador"
-      ]);
-    } else {
-      _citiesAutocomplete.setCities([]);
+    var citiesResult = await CitiesHttpRequest.getCities(countryName);
+    print('cities result\n$citiesResult');
+    if(citiesResult.isEmpty) {
+      return;
     }
-
+    _citiesAutocomplete.setCities(citiesResult.map((e) => e.name).toList());
     setState(() {});
   }
 }
