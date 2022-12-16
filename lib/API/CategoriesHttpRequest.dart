@@ -8,7 +8,7 @@ class CategoriesHttpRequest {
   static Future<List<Category>> getCategory() async {
     var headers = {
       'X-RapidAPI-Host': 'the-cocktail-db.p.rapidapi.com',
-      'X-RapidAPI-Key': '4c545c644bmsh13b3c6a7260055dp120109jsnf32158c091ec',
+      'X-RapidAPI-Key': 'trocar',
     };
 
     var params = {
