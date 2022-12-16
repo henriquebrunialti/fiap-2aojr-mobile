@@ -1,10 +1,10 @@
-import 'package:custo_de_vida/API/CitiesHttpRequest.dart';
-import 'package:custo_de_vida/API/CountriesHttpRequest.dart';
-import 'package:custo_de_vida/components/CountryAutocomplete.dart';
+import 'package:custo_de_vida/API/DrinksHttpRequest.dart';
+import 'package:custo_de_vida/API/CategoriesHttpRequest.dart';
+import 'package:custo_de_vida/components/CategoryAutocomplete.dart';
 import 'package:flutter/material.dart';
 
-import '../components/CitiesAutocomplete.dart';
-import '../models/country.dart';
+import '../components/CocktailsAutocomplete.dart';
+import '../models/drinkscategory.dart';
 
 class Search extends StatefulWidget {
   const Search({super.key});
@@ -15,43 +15,39 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   _SearchState() {
-    _countryAutocomplete = CountryAutocomplete(
+    _CategoryAutocomplete = CategoryAutocomplete(
       key: GlobalKey(),
-      onCountrySelected: onCountrySelected,
+      onCategorySelected: onCategorySelected,
       options: suggestions,
     );
   }
-  TextEditingController countryController = TextEditingController();
-  // GlobalKey<AutoCompleteTextFieldState<Country>> countryKey = GlobalKey();
-  List<String> suggestions = ["brazil"];
-
+  TextEditingController CategoryController = TextEditingController();
+  List<String> suggestions = [];
   List<String> cities = [];
 
-  final CitiesAutocomplete _citiesAutocomplete = CitiesAutocomplete(key: GlobalKey());
-  late CountryAutocomplete _countryAutocomplete;
+  final CitiesAutocomplete _citiesAutocomplete =
+      CitiesAutocomplete(key: GlobalKey());
+  late CategoryAutocomplete _CategoryAutocomplete;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Scaffold>(
-      future: loadSearch(),
-      builder:(context, AsyncSnapshot<Scaffold> snapshot) {
-        if(snapshot.hasData)
-        {
-          return snapshot.data ?? const Scaffold(body: Text("loading"));
-        }
-        else
-        {
-          return const Scaffold(body: Text("loading"));
-        }
-      }
-    );
+        future: loadSearch(),
+        builder: (context, AsyncSnapshot<Scaffold> snapshot) {
+          if (snapshot.hasData) {
+            //TODO: Tela de loading mais bonita
+            return snapshot.data ?? const Scaffold(body: Text("loading"));
+          } else {
+            return const Scaffold(body: Text("loading"));
+          }
+        });
   }
 
   Future<Scaffold> loadSearch() async {
     if (suggestions.isEmpty) {
-      var c = await CountriesHttpRequest.getCountries();
-      suggestions = c.map((c) => c.name).toList();
-      _countryAutocomplete.options = suggestions;
+      var c = await CategoriesHttpRequest.getCategory();
+      suggestions = c.map((c) => c.strCategory).toList();
+      _CategoryAutocomplete.options = suggestions;
     }
     return Scaffold(
         drawer: Drawer(
@@ -68,24 +64,19 @@ class _SearchState extends State<Search> {
           ),
         ),
         appBar: AppBar(
-          title: const Text("Custo de vida"),
+          title: const Text("Cocktails"),
         ),
         body: Center(
             child: ListView(
-          children: [_countryAutocomplete, _citiesAutocomplete],
+          children: [_CategoryAutocomplete, _citiesAutocomplete],
         )));
   }
 
-  void onCountrySelected(String countryName) async {
-    print('selected $countryName');
-    _countryAutocomplete.autocompleteSelection = countryName;
-    _countryAutocomplete.onCountrySelected = onCountrySelected;
-    var citiesResult = await CitiesHttpRequest.getCities(countryName);
-    print('cities result\n$citiesResult');
-    if(citiesResult.isEmpty) {
-      return;
-    }
-    _citiesAutocomplete.setCities(citiesResult.map((e) => e.name).toList());
+  void onCategorySelected(String categoryName) async {
+    _CategoryAutocomplete.autocompleteSelection = categoryName;
+    _CategoryAutocomplete.onCategorySelected = onCategorySelected;
+    var drinks = await DrinksHttpRequest.getDrinks(categoryName);
+    _citiesAutocomplete.setCities(drinks.map((d) => d.name).toList());
     setState(() {});
   }
 }

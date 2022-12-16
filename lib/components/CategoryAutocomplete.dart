@@ -1,38 +1,38 @@
 import 'package:flutter/material.dart';
 
-class CitiesAutocomplete extends StatefulWidget {
 
-  CitiesAutocomplete({super.key, cities}){
-    if(cities != null){
-      this.cities = cities;
+class CategoryAutocomplete extends StatefulWidget {
+  String? autocompleteSelection;
+  Function onCategorySelected;
+  late List<String> options;
+  CategoryAutocomplete({super.key, required this.onCategorySelected, options}){
+    if (options != null) {
+      this.options = options;
+    } else {
+      this.options = <String>[];
     }
   }
 
-  List<String> cities = <String>[];
-
-  void setCities(List<String> c) {
-    cities = c;
-  }
-
   @override
-  State<CitiesAutocomplete> createState() => _CitiesAutocompleteState();
+  State<CategoryAutocomplete> createState() => _CategoryAutocompleteState();
 }
 
-class _CitiesAutocompleteState extends State<CitiesAutocomplete> {
-  String? _autocompleteSelection;
+class _CategoryAutocompleteState extends State<CategoryAutocomplete> {
+
   @override
   Widget build(BuildContext context) {
+    var autocompleteSelection = widget.autocompleteSelection;
+    
     return RawAutocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) {
-        return widget.cities.where((String option) {
-          return option
-              .toLowerCase()
-              .contains(textEditingValue.text.toLowerCase());
+        return widget.options.where((String option) {
+          return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
         });
       },
       onSelected: (String selection) {
         setState(() {
-          _autocompleteSelection = selection;
+          autocompleteSelection = selection;
+          widget.onCategorySelected(autocompleteSelection);
         });
       },
       fieldViewBuilder: (BuildContext context,
@@ -42,15 +42,15 @@ class _CitiesAutocompleteState extends State<CitiesAutocomplete> {
         return TextFormField(
           controller: textEditingController,
           decoration: const InputDecoration(
-            hintText: 'Selecione uma cidade',
+            hintText: 'Selecione uma categoria de Drink',
           ),
           focusNode: focusNode,
           onFieldSubmitted: (String value) {
             onFieldSubmitted();
           },
           validator: (String? value) {
-            if (!widget.cities.contains(value)) {
-              return 'Nothing selected.';
+            if (widget.options.contains(value)) {
+              return 'Nada selecionado.';
             }
             return null;
           },
