@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class CountryAutocomplete extends StatefulWidget {
   String? autocompleteSelection;
-  final Function onCountrySelected;
+  Function onCountrySelected;
   late List<String> options;
   CountryAutocomplete({super.key, required this.onCountrySelected, options}){
     if (options != null) {
@@ -23,7 +23,6 @@ class _CountryAutocompleteState extends State<CountryAutocomplete> {
   Widget build(BuildContext context) {
     var autocompleteSelection = widget.autocompleteSelection;
     
-    print("auto complete selection on build $autocompleteSelection");
     return RawAutocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) {
         return widget.options.where((String option) {

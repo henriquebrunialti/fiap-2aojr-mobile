@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple
 
       ),
-      initialRoute: "/",
+      initialRoute: "/search",
       routes: {
         "/" :(context) => const Home(),
         "/search" :(context) => const Search(),
