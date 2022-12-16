@@ -48,7 +48,7 @@ class _SearchState extends State<Search> {
 
   Future<Scaffold> loadSearch() async {
     if (suggestions.isEmpty) {
-      var c = await CountiesHttpRequest.getCountries();
+      var c = await CountriesHttpRequest.getCountries();
       suggestions = c.map((c) => c.name).toList();
       _countryAutocomplete.options = suggestions;
     }
@@ -76,7 +76,6 @@ class _SearchState extends State<Search> {
   }
 
   void onCountrySelected(String countryName) {
-    print('country Name selected is $countryName');
     _countryAutocomplete.autocompleteSelection = countryName;
     _countryAutocomplete.onCountrySelected = onCountrySelected;
     if (countryName == "USA") {
