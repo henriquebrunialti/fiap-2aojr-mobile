@@ -3,22 +3,14 @@ import 'package:custo_de_vida/components/autocomplete_input.dart';
 import 'package:custo_de_vida/components/hamburger_menu.dart';
 import 'package:custo_de_vida/database/database.dart';
 import 'package:custo_de_vida/models/drink.dart';
+import 'package:custo_de_vida/models/drink_card.dart';
 import 'package:flutter/material.dart';
 
 import '../API/CategoriesHttpRequest.dart';
 
 class Search extends StatefulWidget {
   List<String> categories = [];
-  String? selectedCategory;
-  List<Drink> drinks = [
-    Drink(
-        alcoholic: 'Non alchoolic',
-        category: "chocolate",
-        instructions: 'lorem',
-        name: 'Chocolate Drink',
-        thumb:
-            'https://www.thecocktaildb.com/images/media/drink/u6jrdf1487603173.jpg')
-  ];
+  List<DrinkCard> drinkCards = [];
 
   Search({super.key});
 
@@ -34,15 +26,14 @@ class _SearchState extends State<Search> {
   }
 
   loadCategories() async {
-    var db = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
-    // db.clearAllTables();
+    var db = await _getDatabaseInstance('categories.db');
     List<String> loadedCategories = [];
 
     if (widget.categories.isEmpty) {
       var categsFromDb = await db.categoryDao.findAll();
 
       if (categsFromDb.isEmpty) {
-        print('Loaded from HTTP Request');
+        print('Loaded categories from HTTP Request');
         var categsFromHttp = await CategoriesHttpRequest.getCategories();
 
         for (var cat in categsFromHttp) {
@@ -51,7 +42,7 @@ class _SearchState extends State<Search> {
 
         loadedCategories = categsFromHttp.map((c) => c.title).toList();
       } else {
-        print('Loaded from FloorDB');
+        print('Loaded categories from FloorDB');
         loadedCategories = categsFromDb.map((e) => e.title).toList();
       }
 
@@ -61,11 +52,30 @@ class _SearchState extends State<Search> {
     }
   }
 
-  loadDrinks(String categ) async {
-    if (widget.drinks.isEmpty) {
-      var drinksResponse = await DrinksHttpRequest.getDrinks(categ);
+  loadDrinks(String categName) async {
+    var db = await _getDatabaseInstance('drinks.db');
+    List<DrinkCard> loadedDrinks = [];
+
+    if (widget.drinkCards.isEmpty) {
+      var drinksFromDb = await db.drinkDao.findAllByCategory(categName);
+
+      if (drinksFromDb.isEmpty) {
+        print('Loaded drinks from HTTP Request');
+        var drinksFromHttp = await DrinksHttpRequest.getDrinks(categName);
+
+        for (var drink in drinksFromHttp) {
+          db.drinkDao.insertDrink(drink);
+        }
+
+        loadedDrinks = drinksFromHttp;
+      } else {
+        print('Loaded drinks from FloorDB');
+        loadedDrinks = drinksFromDb;
+      }
+
+      var drinksResponse = await DrinksHttpRequest.getDrinks(categName);
       setState(() {
-        widget.drinks = drinksResponse;
+        widget.drinkCards = drinksResponse;
       });
     }
   }
@@ -90,36 +100,32 @@ class _SearchState extends State<Search> {
                 labelText: 'Categoria',
                 hintText: 'Selecione uma categoria de drink',
                 options: widget.categories,
-                onOptionSelected: (v) => setState(() {
-                  widget.selectedCategory = v;
+                onOptionSelected: (categSelected) => setState(() {
+                  loadDrinks(categSelected);
                 }),
               ),
               const Text(
                 'Resultados:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              ListView.separated(
-                shrinkWrap: true,
-                separatorBuilder: (context, index) =>
-                    const Divider(color: Colors.black, height: 2),
-                itemBuilder: (_, index) => _buildItem(index),
-                itemCount: widget.drinks.length,
-              ),
+              _buildList(),
             ],
           ),
         )));
   }
 
-  // Widget _renderDrinksList() {
-  //   return ListView.separated(
-  //     itemCount: drinks.length,
-  //     itemBuilder: buildItem,
-  //     separatorBuilder: (context, int index) => const Divider(height: 2, color: Colors.black12),
-  //   );
-  // }
+  ListView _buildList() {
+    return ListView.separated(
+      shrinkWrap: true,
+      separatorBuilder: (context, index) =>
+          const Divider(color: Colors.black, height: 2),
+      itemBuilder: (_, index) => _buildItem(index),
+      itemCount: widget.drinkCards.length,
+    );
+  }
 
   Widget _buildItem(int index) {
-    Drink drink = widget.drinks[index];
+    DrinkCard drink = widget.drinkCards[index];
     return Container(
       decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
@@ -127,12 +133,15 @@ class _SearchState extends State<Search> {
       child: ListTile(
         title: Text(drink.name),
         trailing: Icon(Icons.search),
-        subtitle: Text(drink.alcoholic),
+        subtitle: Text(drink.category),
         onTap: () {
           // TODO: navegar para a página de detalhes
-          print(drink.alcoholic);
+          print(drink.name);
         },
       ),
     );
   }
+
+  Future<AppDatabase> _getDatabaseInstance(String dbName) async =>
+      await $FloorAppDatabase.databaseBuilder(dbName).build();
 }
