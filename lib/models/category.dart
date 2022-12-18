@@ -1,15 +1,15 @@
 class Category {
-  late String strCategory;
+  late String title;
 
-  Category({required this.strCategory});
+  Category({required this.title});
 
   Category.fromJson(Map<String, dynamic> json) {
-    strCategory = json['strCategory'];
+    title = json['strCategory'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['strCategory'] = this.strCategory;
+    data['strCategory'] = this.title;
     return data;
   }
 }

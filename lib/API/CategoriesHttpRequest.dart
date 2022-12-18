@@ -8,7 +8,7 @@ class CategoriesHttpRequest {
   static Future<List<Category>> getCategories() async {
     var headers = {
       'X-RapidAPI-Host': 'the-cocktail-db.p.rapidapi.com',
-      'X-RapidAPI-Key': 'trocar',
+      'X-RapidAPI-Key': '49c3bc4f03msh4cec94f885051aap14db54jsn2fc1173dacef',
     };
 
     var params = {
@@ -22,10 +22,10 @@ class CategoriesHttpRequest {
     if (res.statusCode != 200)
       throw Exception('http.get error: statusCode= ${res.statusCode}');
 
-    return _extractCategories(res.body);
+    return _parseCategories(res.body);
   }
 
-  static List<Category> _extractCategories(String responseBody) {
+  static List<Category> _parseCategories(String responseBody) {
     Map<String, dynamic> categories = jsonDecode(responseBody);
     print(categories);
     final mapped =

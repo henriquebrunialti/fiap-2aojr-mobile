@@ -1,56 +1,57 @@
-import 'package:custo_de_vida/API/CategoriesHttpRequest.dart';
 import 'package:custo_de_vida/API/DrinksHttpRequest.dart';
-import 'package:custo_de_vida/components/CategoryAutocomplete.dart';
+import 'package:custo_de_vida/components/autocomplete_input.dart';
 import 'package:custo_de_vida/components/hamburger_menu.dart';
+import 'package:custo_de_vida/models/drink.dart';
 import 'package:flutter/material.dart';
 
-import '../components/CocktailsAutocomplete.dart';
+import '../API/CategoriesHttpRequest.dart';
 
 class Search extends StatefulWidget {
-  const Search({super.key});
+  List<String> categories = ['Chocolate', 'Cocktails'];
+  String? selectedCategory;
+  List<Drink> drinks = [
+    Drink(
+        alcoholic: 'Non alchoolic',
+        category: "chocolate",
+        instructions: 'lorem',
+        name: 'Chocolate Drink',
+        thumb:
+            'https://www.thecocktaildb.com/images/media/drink/u6jrdf1487603173.jpg')
+  ];
+
+  Search({super.key});
 
   @override
   State<Search> createState() => _SearchState();
 }
 
 class _SearchState extends State<Search> {
-  _SearchState() {
-    _CategoryAutocomplete = CategoryAutocomplete(
-      key: GlobalKey(),
-      onCategorySelected: onCategorySelected,
-      options: categories,
-    );
+  @override
+  initState() {
+    super.initState();
+    loadCategories();
   }
 
-  TextEditingController CategoryController = TextEditingController();
-  List<String> categories = [];
-  List<String> drinks = [];
+  loadCategories() async {
+    if (widget.categories.isEmpty) {
+      var categResponse = await CategoriesHttpRequest.getCategories();
+      setState(() {
+        widget.categories = categResponse.map((c) => c.title).toList();
+      });
+    }
+  }
 
-  final CitiesAutocomplete _citiesAutocomplete =
-      CitiesAutocomplete(key: GlobalKey());
-  late CategoryAutocomplete _CategoryAutocomplete;
+  loadDrinks(String categ) async {
+    if (widget.drinks.isEmpty) {
+      var drinksResponse = await DrinksHttpRequest.getDrinks(categ);
+      setState(() {
+        widget.drinks = drinksResponse;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Scaffold>(
-        future: loadSearch(),
-        builder: (context, AsyncSnapshot<Scaffold> snapshot) {
-          if (snapshot.hasData) {
-            //TODO: Tela de loading mais bonita
-            return snapshot.data ?? const Scaffold(body: Text("loading"));
-          } else {
-            return const Scaffold(body: Text("loading"));
-          }
-        });
-  }
-
-  Future<Scaffold> loadSearch() async {
-    if (categories.isEmpty) {
-      var c = await CategoriesHttpRequest.getCategory();
-      categories = c.map((c) => c.strCategory).toList();
-      _CategoryAutocomplete.options = categories;
-    }
-
     return Scaffold(
         drawer: const HamburgerMenu(),
         appBar: AppBar(
@@ -65,22 +66,53 @@ class _SearchState extends State<Search> {
                 'Buscar',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              _CategoryAutocomplete,
-              _citiesAutocomplete,
+              AutocompleteInput(
+                labelText: 'Categoria',
+                hintText: 'Selecione uma categoria de drink',
+                options: widget.categories,
+                onOptionSelected: (v) => setState(() {
+                  widget.selectedCategory = v;
+                }),
+              ),
               const Text(
                 'Resultados:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              ListView.separated(
+                shrinkWrap: true,
+                separatorBuilder: (context, index) =>
+                    const Divider(color: Colors.black, height: 2),
+                itemBuilder: (_, index) => _buildItem(index),
+                itemCount: widget.drinks.length,
               ),
             ],
           ),
         )));
   }
 
-  void onCategorySelected(String categoryName) async {
-    _CategoryAutocomplete.autocompleteSelection = categoryName;
-    _CategoryAutocomplete.onCategorySelected = onCategorySelected;
-    var drinks = await DrinksHttpRequest.getDrinks(categoryName);
-    _citiesAutocomplete.setCities(drinks.map((d) => d.name).toList());
-    setState(() {});
+  // Widget _renderDrinksList() {
+  //   return ListView.separated(
+  //     itemCount: drinks.length,
+  //     itemBuilder: buildItem,
+  //     separatorBuilder: (context, int index) => const Divider(height: 2, color: Colors.black12),
+  //   );
+  // }
+
+  Widget _buildItem(int index) {
+    Drink drink = widget.drinks[index];
+    return Container(
+      decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(5)),
+      child: ListTile(
+        title: Text(drink.name),
+        trailing: Icon(Icons.search),
+        subtitle: Text(drink.alcoholic),
+        onTap: () {
+          // TODO: navegar para a página de detalhes
+          print(drink.alcoholic);
+        },
+      ),
+    );
   }
 }

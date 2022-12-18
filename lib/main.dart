@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       initialRoute: "/search",
       routes: {
         "/" :(context) => const Home(),
-        "/search" :(context) => const Search(),
+        "/search" :(context) => Search(),
         // "/books" :(context) => const ListBookWidget(),
         // "/cars" :(context) => const ListCarWidget(),
       },

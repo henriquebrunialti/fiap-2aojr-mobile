@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 
-class CitiesAutocomplete extends StatefulWidget {
-  CitiesAutocomplete({super.key, cities}) {
-    if (cities != null) {
-      this.cities = cities;
+class DrinksAutocomplete extends StatefulWidget {
+  DrinksAutocomplete({super.key, drinks}) {
+    if (drinks != null) {
+      this.drinks = drinks;
     }
   }
 
-  List<String> cities = <String>[];
+  List<String> drinks = <String>[];
 
-  void setCities(List<String> c) {
-    cities = c;
+  void setDrinks(List<String> d) {
+    drinks = d;
   }
 
   @override
-  State<CitiesAutocomplete> createState() => _CitiesAutocompleteState();
+  State<DrinksAutocomplete> createState() => _DrinksAutocompleteState();
 }
 
-class _CitiesAutocompleteState extends State<CitiesAutocomplete> {
+class _DrinksAutocompleteState extends State<DrinksAutocomplete> {
   String? _autocompleteSelection;
 
   @override
@@ -26,7 +26,7 @@ class _CitiesAutocompleteState extends State<CitiesAutocomplete> {
       margin: const EdgeInsets.symmetric(vertical: 20),
       child: RawAutocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
-          return widget.cities.where((String option) {
+          return widget.drinks.where((String option) {
             return option
                 .toLowerCase()
                 .contains(textEditingValue.text.toLowerCase());
@@ -53,7 +53,7 @@ class _CitiesAutocompleteState extends State<CitiesAutocomplete> {
               onFieldSubmitted();
             },
             validator: (String? value) {
-              if (!widget.cities.contains(value)) {
+              if (!widget.drinks.contains(value)) {
                 return 'Nothing selected.';
               }
               return null;
