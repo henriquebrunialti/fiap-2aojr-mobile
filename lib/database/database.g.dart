@@ -63,6 +63,8 @@ class _$AppDatabase extends AppDatabase {
 
   CategoryDao? _categoryDaoInstance;
 
+  DrinkDao? _drinkDaoInstance;
+
   Future<sqflite.Database> open(
     String path,
     List<Migration> migrations, [
@@ -85,7 +87,9 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Category` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `Category` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `title` TEXT NOT NULL)');
+        await database.execute(
+            'CREATE TABLE IF NOT EXISTS `DrinkCard` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT NOT NULL, `drinkId` TEXT NOT NULL, `thumb` TEXT NOT NULL, `category` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -96,6 +100,11 @@ class _$AppDatabase extends AppDatabase {
   @override
   CategoryDao get categoryDao {
     return _categoryDaoInstance ??= _$CategoryDao(database, changeListener);
+  }
+
+  @override
+  DrinkDao get drinkDao {
+    return _drinkDaoInstance ??= _$DrinkDao(database, changeListener);
   }
 }
 
@@ -122,11 +131,100 @@ class _$CategoryDao extends CategoryDao {
   Future<List<Category>> findAll() async {
     return _queryAdapter.queryList('SELECT * from Category',
         mapper: (Map<String, Object?> row) =>
-            Category(title: row['title'] as String, id: row['id'] as int));
+            Category(title: row['title'] as String, id: row['id'] as int?));
   }
 
   @override
   Future<void> insertCategory(Category category) async {
     await _categoryInsertionAdapter.insert(category, OnConflictStrategy.abort);
+  }
+}
+
+class _$DrinkDao extends DrinkDao {
+  _$DrinkDao(
+    this.database,
+    this.changeListener,
+  )   : _queryAdapter = QueryAdapter(database),
+        _drinkCardInsertionAdapter = InsertionAdapter(
+            database,
+            'DrinkCard',
+            (DrinkCard item) => <String, Object?>{
+                  'id': item.id,
+                  'name': item.name,
+                  'drinkId': item.drinkId,
+                  'thumb': item.thumb,
+                  'category': item.category,
+                  'isFavorite': item.isFavorite ? 1 : 0
+                }),
+        _drinkCardUpdateAdapter = UpdateAdapter(
+            database,
+            'DrinkCard',
+            ['id'],
+            (DrinkCard item) => <String, Object?>{
+                  'id': item.id,
+                  'name': item.name,
+                  'drinkId': item.drinkId,
+                  'thumb': item.thumb,
+                  'category': item.category,
+                  'isFavorite': item.isFavorite ? 1 : 0
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<DrinkCard> _drinkCardInsertionAdapter;
+
+  final UpdateAdapter<DrinkCard> _drinkCardUpdateAdapter;
+
+  @override
+  Future<List<DrinkCard>> findAll() async {
+    return _queryAdapter.queryList('SELECT * from DrinkCard',
+        mapper: (Map<String, Object?> row) => DrinkCard(
+            category: row['category'] as String,
+            name: row['name'] as String,
+            drinkId: row['drinkId'] as String,
+            thumb: row['thumb'] as String,
+            id: row['id'] as int?,
+            isFavorite: (row['isFavorite'] as int) != 0));
+  }
+
+  @override
+  Future<List<DrinkCard>> findFavorites() async {
+    return _queryAdapter.queryList(
+        'SELECT * from DrinkCard where favorite = true',
+        mapper: (Map<String, Object?> row) => DrinkCard(
+            category: row['category'] as String,
+            name: row['name'] as String,
+            drinkId: row['drinkId'] as String,
+            thumb: row['thumb'] as String,
+            id: row['id'] as int?,
+            isFavorite: (row['isFavorite'] as int) != 0));
+  }
+
+  @override
+  Future<List<DrinkCard>> findAllByCategory(String category) async {
+    return _queryAdapter.queryList(
+        'SELECT * from DrinkCard where category = ?1',
+        mapper: (Map<String, Object?> row) => DrinkCard(
+            category: row['category'] as String,
+            name: row['name'] as String,
+            drinkId: row['drinkId'] as String,
+            thumb: row['thumb'] as String,
+            id: row['id'] as int?,
+            isFavorite: (row['isFavorite'] as int) != 0),
+        arguments: [category]);
+  }
+
+  @override
+  Future<void> insertDrink(DrinkCard drink) async {
+    await _drinkCardInsertionAdapter.insert(drink, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateDrink(DrinkCard drink) async {
+    await _drinkCardUpdateAdapter.update(drink, OnConflictStrategy.abort);
   }
 }
