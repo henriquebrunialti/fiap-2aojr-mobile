@@ -1,13 +1,14 @@
 import 'package:custo_de_vida/API/DrinksHttpRequest.dart';
 import 'package:custo_de_vida/components/autocomplete_input.dart';
 import 'package:custo_de_vida/components/hamburger_menu.dart';
+import 'package:custo_de_vida/database/database.dart';
 import 'package:custo_de_vida/models/drink.dart';
 import 'package:flutter/material.dart';
 
 import '../API/CategoriesHttpRequest.dart';
 
 class Search extends StatefulWidget {
-  List<String> categories = ['Chocolate', 'Cocktails'];
+  List<String> categories = [];
   String? selectedCategory;
   List<Drink> drinks = [
     Drink(
@@ -33,10 +34,29 @@ class _SearchState extends State<Search> {
   }
 
   loadCategories() async {
+    var db = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
+    // db.clearAllTables();
+    List<String> loadedCategories = [];
+
     if (widget.categories.isEmpty) {
-      var categResponse = await CategoriesHttpRequest.getCategories();
+      var categsFromDb = await db.categoryDao.findAll();
+
+      if (categsFromDb.isEmpty) {
+        print('Loaded from HTTP Request');
+        var categsFromHttp = await CategoriesHttpRequest.getCategories();
+
+        for (var cat in categsFromHttp) {
+          db.categoryDao.insertCategory(cat);
+        }
+
+        loadedCategories = categsFromHttp.map((c) => c.title).toList();
+      } else {
+        print('Loaded from FloorDB');
+        loadedCategories = categsFromDb.map((e) => e.title).toList();
+      }
+
       setState(() {
-        widget.categories = categResponse.map((c) => c.title).toList();
+        widget.categories = loadedCategories;
       });
     }
   }
