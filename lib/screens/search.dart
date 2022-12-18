@@ -1,5 +1,5 @@
-import 'package:custo_de_vida/API/DrinksHttpRequest.dart';
 import 'package:custo_de_vida/API/CategoriesHttpRequest.dart';
+import 'package:custo_de_vida/API/DrinksHttpRequest.dart';
 import 'package:custo_de_vida/components/CategoryAutocomplete.dart';
 import 'package:custo_de_vida/components/hamburger_menu.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,7 @@ class _SearchState extends State<Search> {
       options: suggestions,
     );
   }
+
   TextEditingController CategoryController = TextEditingController();
   List<String> suggestions = [];
   List<String> cities = [];
@@ -56,8 +57,22 @@ class _SearchState extends State<Search> {
           title: const Text("Cocktails"),
         ),
         body: Center(
-            child: ListView(
-          children: [_CategoryAutocomplete, _citiesAutocomplete],
+            child: Container(
+          padding: const EdgeInsets.all(20),
+          child: ListView(
+            children: [
+              const Text(
+                'Buscar',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              _CategoryAutocomplete,
+              _citiesAutocomplete,
+              const Text(
+                'Resultados:',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         )));
   }
 
@@ -69,5 +84,3 @@ class _SearchState extends State<Search> {
     setState(() {});
   }
 }
-
-
