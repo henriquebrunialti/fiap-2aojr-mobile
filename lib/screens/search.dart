@@ -18,13 +18,13 @@ class _SearchState extends State<Search> {
     _CategoryAutocomplete = CategoryAutocomplete(
       key: GlobalKey(),
       onCategorySelected: onCategorySelected,
-      options: suggestions,
+      options: categories,
     );
   }
 
   TextEditingController CategoryController = TextEditingController();
-  List<String> suggestions = [];
-  List<String> cities = [];
+  List<String> categories = [];
+  List<String> drinks = [];
 
   final CitiesAutocomplete _citiesAutocomplete =
       CitiesAutocomplete(key: GlobalKey());
@@ -45,10 +45,10 @@ class _SearchState extends State<Search> {
   }
 
   Future<Scaffold> loadSearch() async {
-    if (suggestions.isEmpty) {
+    if (categories.isEmpty) {
       var c = await CategoriesHttpRequest.getCategory();
-      suggestions = c.map((c) => c.strCategory).toList();
-      _CategoryAutocomplete.options = suggestions;
+      categories = c.map((c) => c.strCategory).toList();
+      _CategoryAutocomplete.options = categories;
     }
 
     return Scaffold(
