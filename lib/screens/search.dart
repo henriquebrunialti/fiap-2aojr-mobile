@@ -1,10 +1,10 @@
 import 'package:custo_de_vida/API/DrinksHttpRequest.dart';
 import 'package:custo_de_vida/API/CategoriesHttpRequest.dart';
 import 'package:custo_de_vida/components/CategoryAutocomplete.dart';
+import 'package:custo_de_vida/components/hamburger_menu.dart';
 import 'package:flutter/material.dart';
 
 import '../components/CocktailsAutocomplete.dart';
-import '../models/drinkscategory.dart';
 
 class Search extends StatefulWidget {
   const Search({super.key});
@@ -49,20 +49,9 @@ class _SearchState extends State<Search> {
       suggestions = c.map((c) => c.strCategory).toList();
       _CategoryAutocomplete.options = suggestions;
     }
+
     return Scaffold(
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: const [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple,
-                ),
-                child: Text('Menu'),
-              ),
-            ],
-          ),
-        ),
+        drawer: const HamburgerMenu(),
         appBar: AppBar(
           title: const Text("Cocktails"),
         ),
@@ -80,3 +69,5 @@ class _SearchState extends State<Search> {
     setState(() {});
   }
 }
+
+
