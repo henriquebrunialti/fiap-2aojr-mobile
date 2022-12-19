@@ -1,4 +1,4 @@
-# custo_de_vida
+# Cocktails
 
 A new Flutter project.
 
