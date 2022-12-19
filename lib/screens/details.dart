@@ -63,7 +63,6 @@ class _DetailsState extends State<Details> {
                       child: IconButton(
                         icon: const Icon(Icons.favorite),
                         onPressed: () {
-                          // print(widget._drink);
                           _addToFavorites(widget._drink);
                         },
                       ),
