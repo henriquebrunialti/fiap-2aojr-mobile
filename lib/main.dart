@@ -1,5 +1,6 @@
 import 'package:custo_de_vida/screens/home.dart';
 import 'package:custo_de_vida/screens/search.dart';
+import 'package:custo_de_vida/screens/details.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -18,10 +19,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple
 
       ),
-      initialRoute: "/search",
+      initialRoute: "/Search",
       routes: {
         "/" :(context) => const Home(),
         "/search" :(context) => Search(),
+        "/details" :(context) => Details(),
         // "/books" :(context) => const ListBookWidget(),
         // "/cars" :(context) => const ListCarWidget(),
       },
