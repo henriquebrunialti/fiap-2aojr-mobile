@@ -1,5 +1,6 @@
 import 'package:custo_de_vida/screens/home.dart';
 import 'package:custo_de_vida/screens/search.dart';
+import 'package:custo_de_vida/screens/details.dart';
 import 'package:flutter/material.dart';
 
 void main() {

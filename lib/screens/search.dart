@@ -4,6 +4,7 @@ import 'package:custo_de_vida/components/hamburger_menu.dart';
 import 'package:custo_de_vida/database/database.dart';
 import 'package:custo_de_vida/models/drink.dart';
 import 'package:custo_de_vida/models/drink_card.dart';
+import 'package:custo_de_vida/screens/details.dart';
 import 'package:flutter/material.dart';
 
 import '../API/CategoriesHttpRequest.dart';
@@ -135,7 +136,8 @@ class _SearchState extends State<Search> {
         trailing: Icon(Icons.search),
         subtitle: Text(drink.category),
         onTap: () {
-          // TODO: navegar para a página de detalhes
+          // TODO: Pass drink name
+          MaterialPageRoute(builder: (context) => Details(drinkID: drink.drinkId));
           print(drink.name);
         },
       ),
