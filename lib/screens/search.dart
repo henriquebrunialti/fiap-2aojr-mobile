@@ -35,13 +35,10 @@ class _SearchState extends State<Search> {
     var categsFromDb = await db.categoryDao.findAll();
 
     if (categsFromDb.isNotEmpty) {
-      print('::: CARREGOU DO DB :::');
       loadedCategories = categsFromDb;
     } else {
       var categsFromHttp = await CategoriesHttpRequest.getCategories();
-      print('::: CARREGOU DO HTTP :::');
       for (var cat in categsFromHttp) {
-        print('PERSISTING:: ${cat.title}');
         db.categoryDao.insertCategory(cat);
       }
       loadedCategories = categsFromHttp;
@@ -65,23 +62,18 @@ class _SearchState extends State<Search> {
     if (widget.drinkCards.isEmpty) {
       var drinksFromDb = await db.drinkDao.findAllByCategory(categName);
 
-      if (drinksFromDb.isEmpty) {
-        print('Loaded drinks from HTTP Request');
+      if (drinksFromDb.isNotEmpty) {
+        loadedDrinks = drinksFromDb;
+      } else {
         var drinksFromHttp = await DrinksHttpRequest.getDrinks(categName);
-
         for (var drink in drinksFromHttp) {
           db.drinkDao.insertDrink(drink);
         }
-
         loadedDrinks = drinksFromHttp;
-      } else {
-        print('Loaded drinks from FloorDB');
-        loadedDrinks = drinksFromDb;
       }
 
-      var drinksResponse = await DrinksHttpRequest.getDrinks(categName);
       setState(() {
-        widget.drinkCards = drinksResponse;
+        widget.drinkCards = loadedDrinks;
       });
     }
   }
