@@ -126,21 +126,49 @@ class _DetailsState extends State<Details> {
     if (drink.ingredient1 != null) {
       texts.add(Text(drink.ingredient1!));
     }
-
     if (drink.ingredient2 != null) {
       texts.add(Text(drink.ingredient2!));
     }
-
     if (drink.ingredient3 != null) {
       texts.add(Text(drink.ingredient3!));
     }
-
     if (drink.ingredient4 != null) {
       texts.add(Text(drink.ingredient4!));
     }
-
     if (drink.ingredient5 != null) {
       texts.add(Text(drink.ingredient5!));
+    }
+
+    if (drink.ingredient6 != null) {
+      texts.add(Text(drink.ingredient6!));
+    }
+    if (drink.ingredient7 != null) {
+      texts.add(Text(drink.ingredient7!));
+    }
+    if (drink.ingredient8 != null) {
+      texts.add(Text(drink.ingredient8!));
+    }
+    if (drink.ingredient9 != null) {
+      texts.add(Text(drink.ingredient9!));
+    }
+    if (drink.ingredient10 != null) {
+      texts.add(Text(drink.ingredient10!));
+    }
+
+    if (drink.ingredient11 != null) {
+      texts.add(Text(drink.ingredient11!));
+    }
+    if (drink.ingredient12 != null) {
+      texts.add(Text(drink.ingredient12!));
+    }
+    if (drink.ingredient13 != null) {
+      texts.add(Text(drink.ingredient13!));
+    }
+    if (drink.ingredient14 != null) {
+      texts.add(Text(drink.ingredient14!));
+    }
+    if (drink.ingredient15 != null) {
+      texts.add(Text(drink.ingredient15!));
     }
 
     return texts;
