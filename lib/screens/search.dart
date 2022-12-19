@@ -22,12 +22,6 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  @override
-  initState() {
-    super.initState();
-    loadCategories();
-  }
-
   loadCategories() async {
     setState(() {
       widget.loading = true;
@@ -93,45 +87,34 @@ class _SearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.categories.isEmpty) {
+      loadCategories();
+    }
+    const headingStyle = TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
     return Scaffold(
-        drawer: const HamburgerMenu(),
-        appBar: AppBar(
-          title: const Text("Cocktails"),
-        ),
-        body: widget.loading
-            ? const Loading()
-            : Center(
-                child: Container(
-                padding: const EdgeInsets.all(20),
-                child: ListView(
-                  children: [
-                    const Text(
-                      'Buscar',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    AutocompleteInput(
-                        labelText: 'Categoria',
-                        hintText: 'Selecione uma categoria de drink',
-                        options: widget.categories,
-                        onOptionSelected: (categSelected) =>
-                            _loadDrinks(categSelected)),
-                    const Text(
-                      'Resultados:',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    _buildList(),
-                  ],
-                ),
-              )));
+      drawer: const HamburgerMenu(),
+      appBar: AppBar(
+        title: const Text("Cocktails"),
+      ),
+      body: Container(
+          padding: const EdgeInsets.all(20),
+          child: ListView(children: [
+            const Text('Buscar', style: headingStyle),
+            AutocompleteInput(
+              labelText: 'Categoria',
+              hintText: 'Selecione uma categoria de drink',
+              options: widget.categories,
+              onOptionSelected: (categSelected) => _loadDrinks(categSelected),
+            ),
+            const Text('Resultados:', style: headingStyle),
+            _buildList()
+          ])),
+    );
   }
 
   ListView _buildList() {
-    return ListView.separated(
+    return ListView.builder(
       shrinkWrap: true,
-      separatorBuilder: (context, index) =>
-          const Divider(color: Colors.black, height: 2),
       itemBuilder: (_, index) => _buildItem(index),
       itemCount: widget.drinkCards.length,
     );
@@ -139,21 +122,21 @@ class _SearchState extends State<Search> {
 
   Widget _buildItem(int index) {
     DrinkCard drink = widget.drinkCards[index];
-    return Container(
-      decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(5)),
+    return Card(
       child: ListTile(
         title: Text(drink.name),
-        trailing: Icon(Icons.search),
-        subtitle: Text(drink.category),
-        onTap: () {
-          // TODO: Pass drink name
-          Navigator.push(
+        trailing: IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => Details(drinkId: drink.drinkId)));
-        },
+                builder: (context) => Details(drinkId: drink.drinkId),
+              ),
+            );
+          },
+        ),
+        subtitle: Text(drink.category),
       ),
     );
   }
