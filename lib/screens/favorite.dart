@@ -38,12 +38,16 @@ class _FavoriteState extends State<Favorite> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: HamburgerMenu(),
-        appBar: AppBar(title: title),
-        body: ListView.separated(
+      drawer: HamburgerMenu(),
+      appBar: AppBar(title: title),
+      body: RefreshIndicator(
+        onRefresh: (() => getFavorites()),
+        child: ListView.separated(
             itemBuilder: (((context, index) => _buildItem(index))),
             separatorBuilder: ((context, index) => divisorList()),
-            itemCount: drinks.length));
+            itemCount: drinks.length),
+      ),
+    );
   }
 
   Widget _buildItem(int index) {
