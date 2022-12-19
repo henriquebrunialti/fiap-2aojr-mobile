@@ -7,6 +7,8 @@ import 'package:custo_de_vida/models/drink_card.dart';
 import 'package:flutter/material.dart';
 import 'package:custo_de_vida/models/drink.dart';
 
+import '../database/database.dart';
+
 class Details extends StatefulWidget {
   final String drinkId;
   late Drink _drink;
@@ -63,6 +65,19 @@ class _DetailsState extends State<Details> {
                       child: IconButton(
                         icon: const Icon(Icons.favorite),
                         onPressed: () {
+                          showDialog<String>(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                    title: const Text("Favoritos"),
+                                    content: const Text(
+                                        "Item favoritado com sucesso"),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'ok'),
+                                          child: const Text('Ok'))
+                                    ],
+                                  ));
                           _addToFavorites(widget._drink);
                         },
                       ),
@@ -173,8 +188,13 @@ class _DetailsState extends State<Details> {
     return texts;
   }
 
-  _addToFavorites(Drink drink) {
-    print('IMPLEMENTAR ADD TO FAVORITES');
-    DrinkCard.fromDrink(drink);
+  _addToFavorites(Drink drink) async {
+    var drinkModdel = DrinkCard.fromDrink(drink);
+    drinkModdel.isFavorite = true;
+    var db = await _getDatabaseInstance('drinks.db');
+    await db.drinkDao.insertDrink(drinkModdel);
   }
+
+  Future<AppDatabase> _getDatabaseInstance(String dbName) async =>
+      await $FloorAppDatabase.databaseBuilder(dbName).build();
 }

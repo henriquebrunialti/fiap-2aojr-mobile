@@ -84,20 +84,11 @@ class _SearchState extends State<Search> {
       loadCategories();
     }
     return Scaffold(
-<<<<<<< HEAD
-        drawer: HamburgerMenu(),
-        appBar: AppBar(
-          title: const Text("Cocktails"),
-        ),
-        body: Center(
-            child: Container(
-=======
-      drawer: const HamburgerMenu(),
+      drawer: HamburgerMenu(),
       appBar: AppBar(
         title: const Text("Cocktails"),
       ),
       body: Container(
->>>>>>> origin
           padding: const EdgeInsets.all(20),
           child: ListView(children: [
             const Text('Buscar', style: headingStyle),

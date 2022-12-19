@@ -53,7 +53,7 @@ class _FavoriteState extends State<Favorite> {
         child: FavoriteMenuItem(
             title: favoriteDrink.name,
             subtitle: favoriteDrink.category,
-            route: "route"));
+            route: favoriteDrink.drinkId.toString()));
   }
 
   Widget divisorList() => const Divider(

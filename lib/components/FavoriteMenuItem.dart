@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../screens/details.dart';
+
 class FavoriteMenuItem extends StatelessWidget {
   const FavoriteMenuItem(
       {super.key,
@@ -18,7 +20,12 @@ class FavoriteMenuItem extends StatelessWidget {
       subtitle: Text(subtitle),
       trailing: const Icon(Icons.remove_red_eye),
       onTap: () {
-        Navigator.pushNamed(context, route);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Details(drinkId: route),
+          ),
+        );
       },
     );
   }
