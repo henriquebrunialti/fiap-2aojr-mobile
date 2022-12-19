@@ -1,82 +1,138 @@
-import 'package:custo_de_vida/API/DrinksHttpRequest.dart';
-import 'package:custo_de_vida/API/CategoriesHttpRequest.dart';
-import 'package:custo_de_vida/components/CategoryAutocomplete.dart';
+import 'package:custo_de_vida/API/categories_http_request.dart';
+import 'package:custo_de_vida/API/drinks_http_request.dart';
+import 'package:custo_de_vida/components/autocomplete_input.dart';
+import 'package:custo_de_vida/components/hamburger_menu.dart';
+import 'package:custo_de_vida/components/loading.dart';
+import 'package:custo_de_vida/constants/text.dart';
+import 'package:custo_de_vida/database/database.dart';
+import 'package:custo_de_vida/models/category.dart';
+import 'package:custo_de_vida/models/drink_card.dart';
+import 'package:custo_de_vida/screens/details.dart';
 import 'package:flutter/material.dart';
 
-import '../components/CocktailsAutocomplete.dart';
-import '../models/drinkscategory.dart';
-
 class Search extends StatefulWidget {
-  const Search({super.key});
+  List<Category> categories = [];
+  List<DrinkCard> drinkCards = [];
+  bool loading = false;
+  bool loadingDrinks = false;
+
+  Search({super.key});
 
   @override
   State<Search> createState() => _SearchState();
 }
 
 class _SearchState extends State<Search> {
-  _SearchState() {
-    _CategoryAutocomplete = CategoryAutocomplete(
-      key: GlobalKey(),
-      onCategorySelected: onCategorySelected,
-      options: suggestions,
-    );
-  }
-  TextEditingController CategoryController = TextEditingController();
-  List<String> suggestions = [];
-  List<String> cities = [];
+  loadCategories() async {
+    setState(() {
+      widget.loading = true;
+    });
 
-  final CitiesAutocomplete _citiesAutocomplete =
-      CitiesAutocomplete(key: GlobalKey());
-  late CategoryAutocomplete _CategoryAutocomplete;
+    var db = await _getDatabaseInstance('categories.db');
+
+    List<Category> loadedCategories = [];
+
+    var categsFromDb = await db.categoryDao.findAll();
+
+    if (categsFromDb.isNotEmpty) {
+      loadedCategories = categsFromDb;
+    } else {
+      var categsFromHttp = await CategoriesHttpRequest.getCategories();
+      for (var cat in categsFromHttp) {
+        db.categoryDao.insertCategory(cat);
+      }
+      loadedCategories = categsFromHttp;
+    }
+
+    setState(() {
+      widget.categories = loadedCategories;
+      widget.loading = false;
+    });
+  }
+
+  _loadDrinks(String categName) async {
+    setState(() {
+      widget.drinkCards = [];
+      widget.loadingDrinks = true;
+    });
+    var db = await _getDatabaseInstance('drinks.db');
+
+    List<DrinkCard> loadedDrinks = [];
+
+    if (widget.drinkCards.isEmpty) {
+      var drinksFromDb = await db.drinkDao.findAllByCategory(categName);
+
+      if (drinksFromDb.isNotEmpty) {
+        loadedDrinks = drinksFromDb;
+      } else {
+        var drinksFromHttp = await DrinksHttpRequest.getDrinks(categName);
+        for (var drink in drinksFromHttp) {
+          db.drinkDao.insertDrink(drink);
+        }
+        loadedDrinks = drinksFromHttp;
+      }
+
+      setState(() {
+        widget.drinkCards = loadedDrinks;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Scaffold>(
-        future: loadSearch(),
-        builder: (context, AsyncSnapshot<Scaffold> snapshot) {
-          if (snapshot.hasData) {
-            //TODO: Tela de loading mais bonita
-            return snapshot.data ?? const Scaffold(body: Text("loading"));
-          } else {
-            return const Scaffold(body: Text("loading"));
-          }
-        });
-  }
-
-  Future<Scaffold> loadSearch() async {
-    if (suggestions.isEmpty) {
-      var c = await CategoriesHttpRequest.getCategory();
-      suggestions = c.map((c) => c.strCategory).toList();
-      _CategoryAutocomplete.options = suggestions;
+    if (widget.categories.isEmpty) {
+      loadCategories();
     }
     return Scaffold(
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: const [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple,
-                ),
-                child: Text('Menu'),
-              ),
-            ],
-          ),
-        ),
-        appBar: AppBar(
-          title: const Text("Cocktails"),
-        ),
-        body: Center(
-            child: ListView(
-          children: [_CategoryAutocomplete, _citiesAutocomplete],
-        )));
+      drawer: const HamburgerMenu(),
+      appBar: AppBar(
+        title: const Text("Cocktails"),
+      ),
+      body: Container(
+          padding: const EdgeInsets.all(20),
+          child: ListView(children: [
+            const Text('Buscar', style: headingStyle),
+            AutocompleteInput(
+              labelText: 'Categoria',
+              hintText: 'Selecione uma categoria de drink',
+              options: widget.categories,
+              onOptionSelected: (categSelected) => _loadDrinks(categSelected),
+            ),
+            const Text('Resultados:', style: headingStyle),
+            _buildList()
+          ])),
+    );
   }
 
-  void onCategorySelected(String categoryName) async {
-    _CategoryAutocomplete.autocompleteSelection = categoryName;
-    _CategoryAutocomplete.onCategorySelected = onCategorySelected;
-    var drinks = await DrinksHttpRequest.getDrinks(categoryName);
-    _citiesAutocomplete.setCities(drinks.map((d) => d.name).toList());
-    setState(() {});
+  ListView _buildList() {
+    return ListView.builder(
+      shrinkWrap: true,
+      itemBuilder: (_, index) => _buildItem(index),
+      itemCount: widget.drinkCards.length,
+    );
   }
+
+  Widget _buildItem(int index) {
+    DrinkCard drink = widget.drinkCards[index];
+    return Card(
+      child: ListTile(
+        title: Text(drink.name),
+        trailing: IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Details(drinkId: drink.drinkId),
+              ),
+            );
+          },
+        ),
+        subtitle: Text(drink.category),
+      ),
+    );
+  }
+
+  Future<AppDatabase> _getDatabaseInstance(String dbName) async =>
+      await $FloorAppDatabase.databaseBuilder(dbName).build();
 }

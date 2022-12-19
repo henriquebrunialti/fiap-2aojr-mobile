@@ -1,14 +1,16 @@
 import 'dart:convert';
 
+import 'package:custo_de_vida/models/drink.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/drinkscategory.dart';
+import '../models/category.dart';
+import '../models/drink.dart';
 
 class CategoriesHttpRequest {
-  static Future<List<Category>> getCategory() async {
+  static Future<List<Category>> getCategories() async {
     var headers = {
       'X-RapidAPI-Host': 'the-cocktail-db.p.rapidapi.com',
-      'X-RapidAPI-Key': 'trocar',
+      'X-RapidAPI-Key': '49c3bc4f03msh4cec94f885051aap14db54jsn2fc1173dacef',
     };
 
     var params = {
@@ -22,13 +24,14 @@ class CategoriesHttpRequest {
     if (res.statusCode != 200)
       throw Exception('http.get error: statusCode= ${res.statusCode}');
 
-    return _getCategory(res.body);
+    return _parseCategories(res.body);
   }
 
-  static List<Category> _getCategory(String responseBody) {
+  static List<Category> _parseCategories(String responseBody) {
     Map<String, dynamic> categories = jsonDecode(responseBody);
-    final mapped =
-        categories["drinks"].map<Category>((json) => Category.fromJson(json)).toList();
+    final mapped = categories["drinks"]
+        .map<Category>((json) => Category.fromJson(json))
+        .toList();
     return mapped;
   }
 }
