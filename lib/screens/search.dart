@@ -1,17 +1,20 @@
-import 'package:custo_de_vida/API/DrinksHttpRequest.dart';
+import 'package:custo_de_vida/API/categories_http_request.dart';
+import 'package:custo_de_vida/API/drinks_http_request.dart';
 import 'package:custo_de_vida/components/autocomplete_input.dart';
 import 'package:custo_de_vida/components/hamburger_menu.dart';
+import 'package:custo_de_vida/components/loading.dart';
+import 'package:custo_de_vida/constants/text.dart';
 import 'package:custo_de_vida/database/database.dart';
-import 'package:custo_de_vida/models/drink.dart';
+import 'package:custo_de_vida/models/category.dart';
 import 'package:custo_de_vida/models/drink_card.dart';
 import 'package:custo_de_vida/screens/details.dart';
 import 'package:flutter/material.dart';
 
-import '../API/CategoriesHttpRequest.dart';
-
 class Search extends StatefulWidget {
-  List<String> categories = [];
+  List<Category> categories = [];
   List<DrinkCard> drinkCards = [];
+  bool loading = false;
+  bool loadingDrinks = false;
 
   Search({super.key});
 
@@ -20,41 +23,43 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  @override
-  initState() {
-    super.initState();
-    loadCategories();
-  }
-
   loadCategories() async {
+    setState(() {
+      widget.loading = true;
+    });
+
     var db = await _getDatabaseInstance('categories.db');
-    List<String> loadedCategories = [];
 
-    if (widget.categories.isEmpty) {
-      var categsFromDb = await db.categoryDao.findAll();
+    List<Category> loadedCategories = [];
 
-      if (categsFromDb.isEmpty) {
-        print('Loaded categories from HTTP Request');
-        var categsFromHttp = await CategoriesHttpRequest.getCategories();
+    var categsFromDb = await db.categoryDao.findAll();
 
-        for (var cat in categsFromHttp) {
-          db.categoryDao.insertCategory(cat);
-        }
-
-        loadedCategories = categsFromHttp.map((c) => c.title).toList();
-      } else {
-        print('Loaded categories from FloorDB');
-        loadedCategories = categsFromDb.map((e) => e.title).toList();
+    if (categsFromDb.isNotEmpty) {
+      print('::: CARREGOU DO DB :::');
+      loadedCategories = categsFromDb;
+    } else {
+      var categsFromHttp = await CategoriesHttpRequest.getCategories();
+      print('::: CARREGOU DO HTTP :::');
+      for (var cat in categsFromHttp) {
+        print('PERSISTING:: ${cat.title}');
+        db.categoryDao.insertCategory(cat);
       }
-
-      setState(() {
-        widget.categories = loadedCategories;
-      });
+      loadedCategories = categsFromHttp;
     }
+
+    setState(() {
+      widget.categories = loadedCategories;
+      widget.loading = false;
+    });
   }
 
-  loadDrinks(String categName) async {
+  _loadDrinks(String categName) async {
+    setState(() {
+      widget.drinkCards = [];
+      widget.loadingDrinks = true;
+    });
     var db = await _getDatabaseInstance('drinks.db');
+
     List<DrinkCard> loadedDrinks = [];
 
     if (widget.drinkCards.isEmpty) {
@@ -83,43 +88,33 @@ class _SearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.categories.isEmpty) {
+      loadCategories();
+    }
     return Scaffold(
-        drawer: const HamburgerMenu(),
-        appBar: AppBar(
-          title: const Text("Cocktails"),
-        ),
-        body: Center(
-            child: Container(
+      drawer: const HamburgerMenu(),
+      appBar: AppBar(
+        title: const Text("Cocktails"),
+      ),
+      body: Container(
           padding: const EdgeInsets.all(20),
-          child: ListView(
-            children: [
-              const Text(
-                'Buscar',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              AutocompleteInput(
-                labelText: 'Categoria',
-                hintText: 'Selecione uma categoria de drink',
-                options: widget.categories,
-                onOptionSelected: (categSelected) => setState(() {
-                  loadDrinks(categSelected);
-                }),
-              ),
-              const Text(
-                'Resultados:',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              _buildList(),
-            ],
-          ),
-        )));
+          child: ListView(children: [
+            const Text('Buscar', style: headingStyle),
+            AutocompleteInput(
+              labelText: 'Categoria',
+              hintText: 'Selecione uma categoria de drink',
+              options: widget.categories,
+              onOptionSelected: (categSelected) => _loadDrinks(categSelected),
+            ),
+            const Text('Resultados:', style: headingStyle),
+            _buildList()
+          ])),
+    );
   }
 
   ListView _buildList() {
-    return ListView.separated(
+    return ListView.builder(
       shrinkWrap: true,
-      separatorBuilder: (context, index) =>
-          const Divider(color: Colors.black, height: 2),
       itemBuilder: (_, index) => _buildItem(index),
       itemCount: widget.drinkCards.length,
     );
@@ -127,19 +122,21 @@ class _SearchState extends State<Search> {
 
   Widget _buildItem(int index) {
     DrinkCard drink = widget.drinkCards[index];
-    return Container(
-      decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(5)),
+    return Card(
       child: ListTile(
         title: Text(drink.name),
-        trailing: Icon(Icons.search),
+        trailing: IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Details(drinkId: drink.drinkId),
+              ),
+            );
+          },
+        ),
         subtitle: Text(drink.category),
-        onTap: () {
-          // TODO: Pass drink name
-          MaterialPageRoute(builder: (context) => Details(drinkID: drink.drinkId));
-          print(drink.name);
-        },
       ),
     );
   }

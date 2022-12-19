@@ -1,9 +1,10 @@
 
+import 'package:custo_de_vida/models/category.dart';
 import 'package:flutter/material.dart';
 
 class AutocompleteInput extends StatelessWidget {
 
-  late List<String> options = ['Chocolate'];
+  late List<Category> options = [];
   final Function onOptionSelected;
   final String labelText;
   String hintText;
@@ -14,18 +15,18 @@ class AutocompleteInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 20),
-      child: Autocomplete<String>(
+      child: Autocomplete<Category>(
         optionsBuilder: _buildOptions,
         fieldViewBuilder: _buildField,
-        onSelected: (String value) => onOptionSelected(value),
-        displayStringForOption: (String option) => option,
+        onSelected: (Category value) => onOptionSelected(value.title),
+        displayStringForOption: (Category option) => option.title,
       ),
     );
   }
 
-  Iterable<String> _buildOptions(TextEditingValue textEditingValue) {
-    return options.where((String option) {
-      return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+  Iterable<Category> _buildOptions(TextEditingValue textEditingValue) {
+    return options.where((Category option) {
+      return option.title.toLowerCase().contains(textEditingValue.text.toLowerCase());
     });
   }
 
