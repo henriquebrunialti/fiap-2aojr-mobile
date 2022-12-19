@@ -137,7 +137,7 @@ class _SearchState extends State<Search> {
         subtitle: Text(drink.category),
         onTap: () {
           // TODO: Pass drink name
-          MaterialPageRoute(builder: (context) => const Details());
+          MaterialPageRoute(builder: (context) => Details(drinkID: drink.drinkId));
           print(drink.name);
         },
       ),
