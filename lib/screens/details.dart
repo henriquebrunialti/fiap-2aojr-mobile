@@ -1,14 +1,18 @@
-import 'package:custo_de_vida/API/CategoriesHttpRequest.dart';
+import 'package:custo_de_vida/API/categories_http_request.dart';
+import 'package:custo_de_vida/API/drinks_http_request.dart';
 import 'package:custo_de_vida/components/hamburger_menu.dart';
+import 'package:custo_de_vida/components/loading.dart';
+import 'package:custo_de_vida/constants/text.dart';
 import 'package:custo_de_vida/models/drink_card.dart';
 import 'package:flutter/material.dart';
 import 'package:custo_de_vida/models/drink.dart';
 
 class Details extends StatefulWidget {
-  final String drinkID;
+  final String drinkId;
   late Drink _drink;
+  bool loading = true;
 
-  Details({super.key, required this.drinkID});
+  Details({super.key, required this.drinkId});
 
   @override
   State<Details> createState() => _DetailsState();
@@ -16,121 +20,161 @@ class Details extends StatefulWidget {
 
 class _DetailsState extends State<Details> {
   @override
+  void initState() {
+    super.initState();
+    _loadDrink(widget.drinkId);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    _loadDrink();
     return Scaffold(
       drawer: HamburgerMenu(),
       appBar: AppBar(
         title: const Text('Cocktail Details'),
-      ),
-      body: Column(
-        children: [
-          Center(
-              child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 3,
-            child: Image.network(widget._drink.thumb, fit: BoxFit.fill),
-          )),
-          Row(
-            children: [
-              Padding(
-                  padding: EdgeInsets.only(left: 10.0, bottom: 0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(widget._drink.name,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20)),
-                  )),
-              Spacer(),
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: Icon(Icons.favorite),
-                  onPressed: () {
-                    _addToFavorites(widget._drink);
-                  },
-                ),
-              )
-            ],
-          ),
-          Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(widget._drink.alcoholic,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14)))),
-          Column(
-            children: [
-              Padding(
-                  padding: EdgeInsets.only(left: 10, top: 20),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Ingredients',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20)),
-                  )),
-              Padding(
-                padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-                child: Row(
-                  children: _countIngredients(widget._drink),
-                ),
-              )
-            ],
-          ),
-          Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(left: 10, top: 20),
-                child: Text('Instructions',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              )),
-          Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(left: 10, top: 10),
-                child: Text(widget._drink.instructions),
-              ))
+        actions: [
+          IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context);
+              })
         ],
       ),
+      body: widget.loading
+          ? const Loading()
+          : Column(
+              children: [
+                Center(
+                    child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 3,
+                  child: Image.network(widget._drink.thumb, fit: BoxFit.fill),
+                )),
+                Row(
+                  children: [
+                    Padding(
+                        padding: const EdgeInsets.only(left: 10.0, bottom: 0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(widget._drink.name, style: headingStyle),
+                        )),
+                    const Spacer(),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.favorite),
+                        onPressed: () {
+                          _addToFavorites(widget._drink);
+                        },
+                      ),
+                    )
+                  ],
+                ),
+                Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(widget._drink.alcoholic,
+                            style: subheadingStyle))),
+                Column(
+                  children: [
+                    const Padding(
+                        padding: EdgeInsets.only(left: 10, top: 20),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text('Ingredients', style: headingStyle),
+                        )),
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 10, right: 10, top: 10),
+                      child: Column(
+                        children: _countIngredients(widget._drink),
+                      ),
+                    )
+                  ],
+                ),
+                const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 10, top: 20),
+                      child: Text('Instructions',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20)),
+                    )),
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 10, top: 10),
+                      child: Text(widget._drink.instructions),
+                    ))
+              ],
+            ),
     );
   }
 
-  _loadDrink() async {
-    var drinkDetails = await CategoriesHttpRequest.getDetails(widget.drinkID);
+  _loadDrink(String id) async {
+    var drinkDetails = await DrinksHttpRequest.getDetails(id);
     setState(() {
       widget._drink = drinkDetails;
+      widget.loading = false;
     });
   }
 
   List<Text> _countIngredients(Drink drink) {
-    List<String> ings = [];
-    if (drink.strIngredient1.isNotEmpty || drink.strIngredient1 != null) {
-      ings.add(drink.strIngredient1);
+    List<Text> texts = [];
+
+    if (drink.ingredient1 != null) {
+      texts.add(Text(drink.ingredient1!));
     }
-    if (drink.strIngredient2.isNotEmpty || drink.strIngredient2 != null) {
-      ings.add(drink.strIngredient2);
+    if (drink.ingredient2 != null) {
+      texts.add(Text(drink.ingredient2!));
     }
-    if (drink.strIngredient3.isNotEmpty || drink.strIngredient3 != null) {
-      ings.add(drink.strIngredient3);
+    if (drink.ingredient3 != null) {
+      texts.add(Text(drink.ingredient3!));
     }
-    if (drink.strIngredient4.isNotEmpty || drink.strIngredient4 != null) {
-      ings.add(drink.strIngredient4);
+    if (drink.ingredient4 != null) {
+      texts.add(Text(drink.ingredient4!));
     }
-    if (drink.strIngredient5.isNotEmpty || drink.strIngredient5 != null) {
-      ings.add(drink.strIngredient5);
+    if (drink.ingredient5 != null) {
+      texts.add(Text(drink.ingredient5!));
     }
 
-    List<Text> texts = [];
-    ings.forEach((element) {
-      texts.add(Text(element));
-    });
+    if (drink.ingredient6 != null) {
+      texts.add(Text(drink.ingredient6!));
+    }
+    if (drink.ingredient7 != null) {
+      texts.add(Text(drink.ingredient7!));
+    }
+    if (drink.ingredient8 != null) {
+      texts.add(Text(drink.ingredient8!));
+    }
+    if (drink.ingredient9 != null) {
+      texts.add(Text(drink.ingredient9!));
+    }
+    if (drink.ingredient10 != null) {
+      texts.add(Text(drink.ingredient10!));
+    }
+
+    if (drink.ingredient11 != null) {
+      texts.add(Text(drink.ingredient11!));
+    }
+    if (drink.ingredient12 != null) {
+      texts.add(Text(drink.ingredient12!));
+    }
+    if (drink.ingredient13 != null) {
+      texts.add(Text(drink.ingredient13!));
+    }
+    if (drink.ingredient14 != null) {
+      texts.add(Text(drink.ingredient14!));
+    }
+    if (drink.ingredient15 != null) {
+      texts.add(Text(drink.ingredient15!));
+    }
 
     return texts;
   }
 
   _addToFavorites(Drink drink) {
+    print('IMPLEMENTAR ADD TO FAVORITES');
     DrinkCard.fromDrink(drink);
   }
 }
