@@ -6,8 +6,6 @@ class HamburgerMenu extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  final addRoute = Favorite();
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -18,12 +16,25 @@ class HamburgerMenu extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.deepPurple,
             ),
-            child: Text(
-              'Menu',
-              style: TextStyle(color: Colors.white, fontSize: 20),
+            child: ListTile(
+              title: Text(
+                'Menu',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+              onTap: () {
+                Navigator.pushNamed(context, "/favorites");
+              },
             ),
           ),
           ListTile(
+            leading: Icon(Icons.search),
+            title: Text('Buscar'),
+            onTap: () {
+              Navigator.pushNamed(context, "/search");
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.favorite),
             title: Text('Favoritos'),
             onTap: () {
               Navigator.pushNamed(context, "/favorites");

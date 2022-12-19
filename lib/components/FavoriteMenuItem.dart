@@ -14,10 +14,9 @@ class FavoriteMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.remove_red_eye_outlined),
       title: Text(title),
       subtitle: Text(subtitle),
-      trailing: const Icon(Icons.navigate_next),
+      trailing: const Icon(Icons.remove_red_eye),
       onTap: () {
         Navigator.pushNamed(context, route);
       },

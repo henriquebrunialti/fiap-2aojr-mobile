@@ -19,7 +19,7 @@ class _DetailsState extends State<Details> {
   Widget build(BuildContext context) {
     _loadDrink();
     return Scaffold(
-      drawer: const HamburgerMenu(),
+      drawer: HamburgerMenu(),
       appBar: AppBar(
         title: const Text('Cocktail Details'),
       ),
@@ -29,9 +29,7 @@ class _DetailsState extends State<Details> {
               child: SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height / 3,
-            child: Image.network(
-                widget._drink.thumb,
-                fit: BoxFit.fill),
+            child: Image.network(widget._drink.thumb, fit: BoxFit.fill),
           )),
           Row(
             children: [
@@ -72,13 +70,10 @@ class _DetailsState extends State<Details> {
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 20)),
                   )),
-
               Padding(
                 padding: EdgeInsets.only(left: 10, right: 10, top: 10),
                 child: Row(
-                  children:
-                    _countIngredients(widget._drink)
-                  ,
+                  children: _countIngredients(widget._drink),
                 ),
               )
             ],
@@ -138,5 +133,4 @@ class _DetailsState extends State<Details> {
   _addToFavorites(Drink drink) {
     DrinkCard.fromDrink(drink);
   }
-
 }
