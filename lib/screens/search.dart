@@ -3,6 +3,7 @@ import 'package:custo_de_vida/API/drinks_http_request.dart';
 import 'package:custo_de_vida/components/autocomplete_input.dart';
 import 'package:custo_de_vida/components/hamburger_menu.dart';
 import 'package:custo_de_vida/components/loading.dart';
+import 'package:custo_de_vida/constants/text.dart';
 import 'package:custo_de_vida/database/database.dart';
 import 'package:custo_de_vida/models/category.dart';
 import 'package:custo_de_vida/models/drink_card.dart';
@@ -90,7 +91,6 @@ class _SearchState extends State<Search> {
     if (widget.categories.isEmpty) {
       loadCategories();
     }
-    const headingStyle = TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
     return Scaffold(
       drawer: const HamburgerMenu(),
       appBar: AppBar(
