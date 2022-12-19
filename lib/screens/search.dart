@@ -84,7 +84,7 @@ class _SearchState extends State<Search> {
       loadCategories();
     }
     return Scaffold(
-      drawer: const HamburgerMenu(),
+      drawer: HamburgerMenu(),
       appBar: AppBar(
         title: const Text("Cocktails"),
       ),

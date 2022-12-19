@@ -1,3 +1,4 @@
+import 'package:custo_de_vida/screens/favorite.dart';
 import 'package:custo_de_vida/screens/home.dart';
 import 'package:custo_de_vida/screens/search.dart';
 import 'package:custo_de_vida/screens/details.dart';
@@ -21,6 +22,9 @@ class MyApp extends StatelessWidget {
       routes: {
         "/": (context) => const Home(),
         "/search": (context) => Search(),
+        "/favorites": (context) => Favorite(),
+        // "/books" :(context) => const ListBookWidget(),
+        // "/cars" :(context) => const ListCarWidget(),
       },
     );
   }
