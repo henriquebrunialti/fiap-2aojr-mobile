@@ -1,3 +1,4 @@
+import 'package:custo_de_vida/screens/favorite.dart';
 import 'package:custo_de_vida/screens/home.dart';
 import 'package:custo_de_vida/screens/search.dart';
 import 'package:flutter/material.dart';
@@ -14,14 +15,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Consulta de custo de vida',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple
-
-      ),
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
       initialRoute: "/search",
       routes: {
-        "/" :(context) => const Home(),
-        "/search" :(context) => Search(),
+        "/": (context) => const Home(),
+        "/search": (context) => Search(),
+        "/favorites": (context) => Favorite(),
         // "/books" :(context) => const ListBookWidget(),
         // "/cars" :(context) => const ListCarWidget(),
       },

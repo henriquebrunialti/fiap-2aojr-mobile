@@ -53,7 +53,7 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: const HamburgerMenu(),
+        drawer: HamburgerMenu(),
         appBar: AppBar(
           title: const Text("Cocktails"),
         ),
