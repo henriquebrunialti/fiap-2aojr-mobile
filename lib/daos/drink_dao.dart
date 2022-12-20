@@ -8,7 +8,7 @@ abstract class DrinkDao {
   @Query('SELECT * from DrinkCard')
   Future<List<DrinkCard>> findAll();
 
-  @Query('SELECT * from DrinkCard where favorite = true')
+  @Query('SELECT * from DrinkCard where isFavorite = true')
   Future<List<DrinkCard>> findFavorites();
 
   @Query('SELECT * from DrinkCard where category = :category ')

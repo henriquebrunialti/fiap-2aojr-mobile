@@ -194,7 +194,7 @@ class _$DrinkDao extends DrinkDao {
   @override
   Future<List<DrinkCard>> findFavorites() async {
     return _queryAdapter.queryList(
-        'SELECT * from DrinkCard where favorite = true',
+        'SELECT * from DrinkCard where isFavorite = true',
         mapper: (Map<String, Object?> row) => DrinkCard(
             category: row['category'] as String,
             name: row['name'] as String,

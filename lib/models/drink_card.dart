@@ -31,5 +31,7 @@ class DrinkCard {
     drinkId = drink.drinkId;
     name = drink.name;
     thumb = drink.thumb;
+    category = drink.category;
+    isFavorite = false;
   }
 }
